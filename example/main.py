@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-version = "Test 0.2"
+version = "Test 0.4"
 
 def TakeScreenShot():
     with mss.mss() as sct:
@@ -30,7 +30,7 @@ def TakeScreenShot():
         xml_Software = ET.SubElement(root, "Software", {"Name": "Python Demo SSE", "Version": version})
         ET.SubElement(xml_Software, "File", {"Name": "functions.py"}).text = hmacFunctionsPY
         ET.SubElement(xml_Software, "File", {"Name": "main.py"}).text = hmacMainPY
-        ET.SubElement(root, "PicID").text = PicID
+        ET.SubElement(root, "PicID", {"sequencenumber": str(getCounter())}).text = PicID
         xml_Times = ET.SubElement(root, "ExtTimes", {"timezone": TimeZone})
         for server, EXTtime in Times.items():
             ET.SubElement(xml_Times, "Time", {"Server": server}).text = str(EXTtime)
@@ -56,7 +56,8 @@ def TakeScreenShot():
 
         img = Image.frombytes('RGB', sct_img.size, sct_img.rgb)
         imgByteArr = io.BytesIO()
-        img.save(imgByteArr, format='PNG')
+        img.save(imgByteArr, format='PNG', optimize=True)
+
         # imgByteArr.getvalue()
         try:
             ET.SubElement(root, "Pic_Checksum", {"Typ": "MD5"}).text = hashlib.md5(imgByteArr.getvalue()).hexdigest()
@@ -77,6 +78,9 @@ def TakeScreenShot():
                 imgByteArr.getvalue()).hexdigest()
         except AttributeError:
             pass
+        XML_Windows = ET.SubElement(root,"Windows")
+        for window in GetWindows():
+            ET.SubElement(XML_Windows,"Window").text =window
 
         #######Test
         msg = MIMEMultipart()
